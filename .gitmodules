@@ -1,0 +1,3 @@
+[submodule "yolov5_anime"]
+	path = yolov5_anime
+	url = https://github.com/zymk9/yolov5_anime
