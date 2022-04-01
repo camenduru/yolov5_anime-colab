@@ -21,8 +21,12 @@ from models.yolo import Model
 from utils.datasets import letterbox
 from utils.general import non_max_suppression, scale_coords
 
-TOKEN = os.environ['TOKEN']
+ORIGINAL_REPO_URL = 'https://github.com/zymk9/yolov5_anime'
+TITLE = 'zymk9/yolov5_anime'
+DESCRIPTION = f'A demo for {ORIGINAL_REPO_URL}'
+ARTICLE = None
 
+TOKEN = os.environ['TOKEN']
 MODEL_REPO = 'hysts/yolov5_anime'
 MODEL_FILENAME = 'yolov5x_anime.pth'
 CONFIG_FILENAME = 'yolov5x.yaml'
@@ -125,11 +129,6 @@ def main():
     func = functools.partial(predict, device=device, model=model)
     func = functools.update_wrapper(func, predict)
 
-    repo_url = 'https://github.com/zymk9/yolov5_anime'
-    title = 'zymk9/yolov5_anime'
-    description = f'A demo for {repo_url}'
-    article = None
-
     gr.Interface(
         func,
         [
@@ -146,11 +145,11 @@ def main():
                              label='IoU Threshold'),
         ],
         gr.outputs.Image(label='Output'),
-        theme=args.theme,
-        title=title,
-        description=description,
-        article=article,
         examples=examples,
+        title=TITLE,
+        description=DESCRIPTION,
+        article=ARTICLE,
+        theme=args.theme,
         allow_screenshot=args.allow_screenshot,
         allow_flagging=args.allow_flagging,
         live=args.live,
