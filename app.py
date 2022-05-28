@@ -9,14 +9,15 @@ import pathlib
 import sys
 import tarfile
 
-sys.path.insert(0, 'yolov5_anime')
-
 import cv2
 import gradio as gr
 import huggingface_hub
 import numpy as np
 import PIL.Image
 import torch
+
+sys.path.insert(0, 'yolov5_anime')
+
 from models.yolo import Model
 from utils.datasets import letterbox
 from utils.general import non_max_suppression, scale_coords
