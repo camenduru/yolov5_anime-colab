@@ -24,7 +24,7 @@ from utils.general import non_max_suppression, scale_coords
 
 TITLE = 'zymk9/yolov5_anime'
 DESCRIPTION = 'This is an unofficial demo for https://github.com/zymk9/yolov5_anime.'
-ARTICLE = None
+ARTICLE = '<center><img src="https://visitor-badge.glitch.me/badge?page_id=hysts.yolov5_anime" alt="visitor badge"/></center>'
 
 TOKEN = os.environ['TOKEN']
 MODEL_REPO = 'hysts/yolov5_anime'
