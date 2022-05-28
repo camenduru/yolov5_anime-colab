@@ -22,9 +22,8 @@ from models.yolo import Model
 from utils.datasets import letterbox
 from utils.general import non_max_suppression, scale_coords
 
-ORIGINAL_REPO_URL = 'https://github.com/zymk9/yolov5_anime'
 TITLE = 'zymk9/yolov5_anime'
-DESCRIPTION = f'A demo for {ORIGINAL_REPO_URL}'
+DESCRIPTION = 'This is an unofficial demo for https://github.com/zymk9/yolov5_anime.'
 ARTICLE = None
 
 TOKEN = os.environ['TOKEN']
