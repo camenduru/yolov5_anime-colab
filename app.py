@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import argparse
 import functools
 import os
 import pathlib
@@ -24,30 +23,11 @@ from utils.general import non_max_suppression, scale_coords
 
 TITLE = 'zymk9/yolov5_anime'
 DESCRIPTION = 'This is an unofficial demo for https://github.com/zymk9/yolov5_anime.'
-ARTICLE = '<center><img src="https://visitor-badge.glitch.me/badge?page_id=hysts.yolov5_anime" alt="visitor badge"/></center>'
 
-TOKEN = os.environ['TOKEN']
+HF_TOKEN = os.getenv('HF_TOKEN')
 MODEL_REPO = 'hysts/yolov5_anime'
 MODEL_FILENAME = 'yolov5x_anime.pth'
 CONFIG_FILENAME = 'yolov5x.yaml'
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--device', type=str, default='cpu')
-    parser.add_argument('--score-slider-step', type=float, default=0.05)
-    parser.add_argument('--score-threshold', type=float, default=0.4)
-    parser.add_argument('--iou-slider-step', type=float, default=0.05)
-    parser.add_argument('--iou-threshold', type=float, default=0.5)
-    parser.add_argument('--theme', type=str)
-    parser.add_argument('--live', action='store_true')
-    parser.add_argument('--share', action='store_true')
-    parser.add_argument('--port', type=int)
-    parser.add_argument('--disable-queue',
-                        dest='enable_queue',
-                        action='store_false')
-    parser.add_argument('--allow-flagging', type=str, default='never')
-    return parser.parse_args()
 
 
 def load_sample_image_paths() -> list[pathlib.Path]:
@@ -57,7 +37,7 @@ def load_sample_image_paths() -> list[pathlib.Path]:
         path = huggingface_hub.hf_hub_download(dataset_repo,
                                                'images.tar.gz',
                                                repo_type='dataset',
-                                               use_auth_token=TOKEN)
+                                               use_auth_token=HF_TOKEN)
         with tarfile.open(path) as f:
             f.extractall()
     return sorted(image_dir.glob('*'))
@@ -67,10 +47,10 @@ def load_model(device: torch.device) -> torch.nn.Module:
     torch.set_grad_enabled(False)
     model_path = huggingface_hub.hf_hub_download(MODEL_REPO,
                                                  MODEL_FILENAME,
-                                                 use_auth_token=TOKEN)
+                                                 use_auth_token=HF_TOKEN)
     config_path = huggingface_hub.hf_hub_download(MODEL_REPO,
                                                   CONFIG_FILENAME,
-                                                  use_auth_token=TOKEN)
+                                                  use_auth_token=HF_TOKEN)
     state_dict = torch.load(model_path)
     model = Model(cfg=config_path)
     model.load_state_dict(state_dict)
@@ -113,48 +93,30 @@ def predict(image: PIL.Image.Image, score_threshold: float,
     return res
 
 
-def main():
-    args = parse_args()
-    device = torch.device(args.device)
+image_paths = load_sample_image_paths()
+examples = [[path.as_posix(), 0.4, 0.5] for path in image_paths]
 
-    image_paths = load_sample_image_paths()
-    examples = [[path.as_posix(), args.score_threshold, args.iou_threshold]
-                for path in image_paths]
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+model = load_model(device)
+func = functools.partial(predict, device=device, model=model)
 
-    model = load_model(device)
-
-    func = functools.partial(predict, device=device, model=model)
-    func = functools.update_wrapper(func, predict)
-
-    gr.Interface(
-        func,
-        [
-            gr.inputs.Image(type='pil', label='Input'),
-            gr.inputs.Slider(0,
-                             1,
-                             step=args.score_slider_step,
-                             default=args.score_threshold,
-                             label='Score Threshold'),
-            gr.inputs.Slider(0,
-                             1,
-                             step=args.iou_slider_step,
-                             default=args.iou_threshold,
-                             label='IoU Threshold'),
-        ],
-        gr.outputs.Image(label='Output'),
-        examples=examples,
-        title=TITLE,
-        description=DESCRIPTION,
-        article=ARTICLE,
-        theme=args.theme,
-        allow_flagging=args.allow_flagging,
-        live=args.live,
-    ).launch(
-        enable_queue=args.enable_queue,
-        server_port=args.port,
-        share=args.share,
-    )
-
-
-if __name__ == '__main__':
-    main()
+gr.Interface(
+    fn=func,
+    inputs=[
+        gr.Image(label='Input', type='pil'),
+        gr.Slider(label='Score Threshold',
+                  minimum=0,
+                  maximum=1,
+                  step=0.05,
+                  value=0.4),
+        gr.Slider(label='IoU Threshold',
+                  minimum=0,
+                  maximum=1,
+                  step=0.05,
+                  value=0.5),
+    ],
+    outputs=gr.Image(label='Output'),
+    examples=examples,
+    title=TITLE,
+    description=DESCRIPTION,
+).queue().launch(show_api=False)

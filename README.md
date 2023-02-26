@@ -4,7 +4,7 @@ emoji: 📊
 colorFrom: gray
 colorTo: red
 sdk: gradio
-sdk_version: 3.0.5
+sdk_version: 3.19.1
 app_file: app.py
 pinned: false
 ---
@@ -27,7 +27,7 @@ Color for Thumbnail gradient (red, yellow, green, blue, indigo, purple, pink, gr
 Can be either `gradio`, `streamlit`, or `static`
 
 `sdk_version` : _string_
-Only applicable for `streamlit` SDK.  
+Only applicable for `streamlit` SDK.
 See [doc](https://hf.co/docs/hub/spaces) for more info on supported versions.
 
 `app_file`: _string_
